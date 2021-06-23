@@ -73,6 +73,16 @@ const updateUser = async (req, res, next) => {
   }
 };
 
+const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndDelete(req.user._id);
+
+    return res.status(200).json({ data: user });
+  } catch (error) {
+    return next(new AppError(error.message, 404));
+  }
+};
+
 const updateUserthroughManager = async (req, res, next) => {
   try {
     console.log(req.params.id);
@@ -137,4 +147,5 @@ export {
   viewList,
   searchUser,
   updateUserthroughManager,
+  deleteUser,
 };

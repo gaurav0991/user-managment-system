@@ -2,6 +2,7 @@ import express from "express";
 import check from "../middleware/authChecki.js";
 import {
   authSign,
+  deleteUser,
   getProfile,
   registerUser,
   searchUser,
@@ -14,6 +15,7 @@ const router = express.Router();
 router.route("/login").post(authSign);
 router.route("/register").post(registerUser);
 router.route("/update").put(check, updateUser);
+router.route("/delete").delete(check, deleteUser);
 router.route("/update/:id").put(check, updateUserthroughManager);
 router.route("/list").get(check, viewList);
 router.route("/search").get(check, searchUser);
