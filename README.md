@@ -6,6 +6,7 @@ Routes
 - login
 - profile
 - list
+- delete 
 - update
 - search
 - update/:id
