@@ -1,12 +1,18 @@
+import Joi from "joi";
 import AppError from "../middleware/error.js";
 import User from "../models/userModel.js";
-import generate from "../tokenGenerateFunc.js";
+import generate from "../utils/tokenGenerateFunc.js";
+import {
+  loginValidation,
+  registerValidation,
+} from "../utils/validation_schema.js";
 //@endpoint api/v1/auth/login
 //desc auth user
 //method POST
 const authSign = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const result = await loginValidation.validateAsync(req.body);
     const user = await User.findOne({ email: email }).select("+password");
     if (user && (await user.matchPassword(password))) {
       res.json({ user, token: generate(user._id) });
@@ -14,7 +20,10 @@ const authSign = async (req, res, next) => {
       return next(new AppError("Invalid Email or password", 404));
     }
   } catch (e) {
-    return next(new AppError("Error from user", 500));
+    if (e.isJoi) {
+      next(new AppError(e, 422));
+    }
+    return next(new AppError(e, 500));
   }
 };
 //@endpoint api/v1/auth/profile
@@ -39,6 +48,7 @@ const getProfile = async (req, res, next) => {
 const registerUser = async (req, res, next) => {
   try {
     const { email, password, name, isManager } = req.body;
+    const result = await registerValidation.validateAsync(req.body);
     const user = await User.findOne({ email: email });
     if (user) {
       return next(new AppError("User already exists", 409));
@@ -46,7 +56,7 @@ const registerUser = async (req, res, next) => {
     const data = await User.create({ email, password, name, isManager });
     return res.json({ data, token: generate(data._id) });
   } catch (error) {
-    return next(new AppError("Server Error", 500));
+    return next(new AppError(error, error.isJoi ? 422 : 500));
   }
 };
 
